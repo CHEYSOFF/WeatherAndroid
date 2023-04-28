@@ -1,43 +1,81 @@
 package cheysoff.weather
 
-
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import android.view.Menu
+import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import cheysoff.weather.adapterUI.NumberAdapter
+import cheysoff.weather.databinding.ActivityMainBinding
 import cheysoff.weather.parse.GetCoordinates
 import cheysoff.weather.parse.GetWeather
-//import kotlinx.android.synthetic.main.activity_main.numbersRecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        Log.d("WOW", "it works no it doesnt")
+
         val lifecycleScope = lifecycleScope
         lifecycleScope.launch {
             val response = GetWeather().weatherByCoordinates(
                 GetCoordinates().coordinatesByCityName("Moscow"),
                 3
             )
-
+            Log.d("weat", response.get(0).first.toString())
             // Update the UI on the main thread
             withContext(Dispatchers.Main) {
-//                val numbers = listOf(
-//                    Pair(1.0, 2.0),
-//                    Pair(3.0, 4.0),
-//                    Pair(5.0, 6.0)
-//                )
-//                val numberAdapter = NumberAdapter(numbers)
-//                numbersRecyclerView.adapter = numberAdapter
-//                numbersRecyclerView.layoutManager = LinearLayoutManager(this)
+
             }
         }
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
+
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+
+        binding.fab.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAnchorView(R.id.fab)
+                .setAction("Action", null).show()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 }

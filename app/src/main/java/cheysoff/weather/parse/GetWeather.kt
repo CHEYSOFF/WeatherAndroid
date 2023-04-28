@@ -67,6 +67,7 @@ class GetWeather {
             if(daysPassed >= days) {
                 break
             }
+            Log.d("weat", token)
             temperatures.add(token.toDouble())
             daysPassed++
         }
