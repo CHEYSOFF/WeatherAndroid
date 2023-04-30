@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +56,7 @@ import cheysoff.weather.ui.theme.LightBlue
 import cheysoff.weather.ui.theme.LightBlue2
 import cheysoff.weather.ui.theme.LightPurple
 import cheysoff.weather.ui.theme.LightRed
+import cheysoff.weather.ui.theme.Orange
 import cheysoff.weather.ui.theme.WeatherTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.buffer
@@ -169,17 +171,29 @@ class MainActivity : ComponentActivity() {
 
 
                         ) {
-
+                        val textSize = 25
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.fillMaxWidth()
 
                         ) {
                             Text(
-                                text = "Weather in ${city.name}",
-                                color = White,
-                                fontSize = 20.sp
+                                buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                        append("Weather in ")
+                                    }
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = Orange,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(city.name)
+                                    }
+                                }
                             )
+
                         }
                         Box(
                             contentAlignment = Alignment.Center,
@@ -187,9 +201,23 @@ class MainActivity : ComponentActivity() {
 
                         ) {
                             Text(
-                                text = "on ${city.latitude} ${city.longitude}",
-                                color = White,
-                                fontSize = 20.sp
+                                buildAnnotatedString {
+
+                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                        append("on ")
+                                    }
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append("${city.latitude} ${city.longitude}")
+                                    }
+
+
+                                }
                             )
 
                         }
@@ -199,9 +227,26 @@ class MainActivity : ComponentActivity() {
 
                         ) {
                             Text(
-                                text = "for ${weatherList.size}",
-                                color = White,
-                                fontSize = 20.sp
+                                buildAnnotatedString {
+
+                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                        append("for ")
+                                    }
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(weatherList.size.toString() + " ")
+                                    }
+                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                        append("days")
+                                    }
+
+
+                                }
                             )
 
                         }
