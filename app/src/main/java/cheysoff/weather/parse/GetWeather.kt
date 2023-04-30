@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
+import java.net.ConnectException
 import java.util.concurrent.CountDownLatch
 
 class GetWeather {
@@ -33,6 +34,9 @@ class GetWeather {
         var temperaturesList: List<Double>? = emptyList()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                if(e is ConnectException) {
+                    Log.d("Fail", "No internet!")
+                }
                 Log.e("Exception", "Message: ${e.message}")
                 Log.d("FAIL", "")
                 latch.countDown()

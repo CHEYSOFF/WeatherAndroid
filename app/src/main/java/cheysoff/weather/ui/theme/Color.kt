@@ -10,4 +10,9 @@ val PurpleGrey40 = Color(0xFF9575CD)
 val Pink40 = Color(0xFFF06292)
 
 val LightPurple = Color(0x79817DAF)
+val DarkBlue = Color(0x4F2F1DFD)
+val CustomWhite = Color(0xFFDAD7D7)
 val MyTransparent = Color(0xFFFFFF)
+
+val LightRed = Color(0xFFFF0000)
+val LightBlue = Color(0xFF0054FF)

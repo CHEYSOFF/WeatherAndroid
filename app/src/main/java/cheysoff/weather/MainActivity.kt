@@ -1,12 +1,11 @@
 package cheysoff.weather
 
 import android.os.Bundle
-import android.text.style.BackgroundColorSpan
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,24 +14,34 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import cheysoff.weather.parse.GetCoordinates
 import cheysoff.weather.parse.GetWeather
+import cheysoff.weather.ui.theme.DarkBlue
+import cheysoff.weather.ui.theme.LightBlue
 import cheysoff.weather.ui.theme.LightPurple
-import cheysoff.weather.ui.theme.MyTransparent
+import cheysoff.weather.ui.theme.LightRed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,14 +63,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun WeatherList(weatherList: List<Pair<Double, Double>>) {
     Image(
@@ -69,37 +72,78 @@ fun WeatherList(weatherList: List<Pair<Double, Double>>) {
         contentDescription = "background image",
         modifier = Modifier
             .fillMaxSize()
-            .alpha(0.5f),
-        contentScale = ContentScale.FillBounds
+            .alpha(0.7f),
+        contentScale = ContentScale.FillBounds,
     )
     Card(
 
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
-            .background(LightPurple),
+            .padding(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = LightPurple,
+        ),
+
         shape = RoundedCornerShape(15.dp),
+//        elevation = CardDefaults.cardElevation(
+//            defaultElevation = 10.dp
+//        )
 
-
-        ) {
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MyTransparent),
+                .clip(RoundedCornerShape(10.dp)),
+            contentAlignment = Alignment.Center,
 
-            contentAlignment = Alignment.Center
-        ) {
+            ) {
             Column(
-                modifier = Modifier
-                    .background(MyTransparent),
+                modifier = Modifier,
+                verticalArrangement = Arrangement.Center
             ) {
                 for (i in weatherList.indices) {
-                    val pair = weatherList.get(i)
+                    val pair = weatherList[i]
                     Row(
-                        modifier = Modifier
-                            .background(MyTransparent)
+//                        contentAlignment = Alignment.Center
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "(${pair.first}, ${pair.second})")
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = DarkBlue,
+                            ),
+                            shape = RoundedCornerShape(0.dp),
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxWidth()
+
+                            ) {
+
+//                                val gradientColors = listOf(White, LightRed, White, LightBlue)
+                                Text(
+                                    buildAnnotatedString {
+                                        withStyle(style = ParagraphStyle(lineHeight = 30.sp)) {
+                                            withStyle(style = SpanStyle(color = White)) {
+                                                append("from ")
+                                            }
+                                            withStyle(style = SpanStyle(color = LightBlue)) {
+                                                append("${pair.first.roundToInt()} ºC")
+                                            }
+                                            withStyle(style = SpanStyle(color = White)) {
+                                                append(" to ")
+                                            }
+                                            withStyle(style = SpanStyle(color = LightRed)) {
+                                                append("${pair.second.roundToInt()} ºC")
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                        }
+
                     }
 
                 }
@@ -107,13 +151,4 @@ fun WeatherList(weatherList: List<Pair<Double, Double>>) {
 
         }
     }
-//    Column {
-//        for (i in weatherList.indices) {
-//            val pair = weatherList.get(i)
-//            Text(text = "(${pair.first}, ${pair.second})")
-//        }
-////        weatherList.forEach { pair ->
-////            Text(text = "(${pair.first}, ${pair.second})")
-////        }
-//    }
 }

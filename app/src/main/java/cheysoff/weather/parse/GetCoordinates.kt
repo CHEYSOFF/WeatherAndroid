@@ -4,6 +4,7 @@ import android.util.Log
 import cheysoff.weather.City
 import okhttp3.*
 import java.io.IOException
+import java.net.ConnectException
 import java.util.Scanner
 import java.util.concurrent.CountDownLatch
 
@@ -22,6 +23,9 @@ class GetCoordinates {
         val latch = CountDownLatch(1)
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                if(e is ConnectException) {
+                    Log.d("Fail", "No internet!")
+                }
                 latch.countDown()
             }
 
