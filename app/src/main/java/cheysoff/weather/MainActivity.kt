@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +63,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import java.net.UnknownHostException
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -179,7 +180,12 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Text(
                                 buildAnnotatedString {
-                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White
+                                        )
+                                    ) {
                                         append("Weather in ")
                                     }
                                     withStyle(
@@ -203,7 +209,12 @@ class MainActivity : ComponentActivity() {
                             Text(
                                 buildAnnotatedString {
 
-                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White
+                                        )
+                                    ) {
                                         append("on ")
                                     }
                                     withStyle(
@@ -229,7 +240,12 @@ class MainActivity : ComponentActivity() {
                             Text(
                                 buildAnnotatedString {
 
-                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White
+                                        )
+                                    ) {
                                         append("for ")
                                     }
                                     withStyle(
@@ -241,7 +257,12 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                         append(weatherList.size.toString() + " ")
                                     }
-                                    withStyle(style = SpanStyle(fontSize = textSize.sp, color = White)) {
+                                    withStyle(
+                                        style = SpanStyle(
+                                            fontSize = textSize.sp,
+                                            color = White
+                                        )
+                                    ) {
                                         append("days")
                                     }
 
@@ -251,14 +272,59 @@ class MainActivity : ComponentActivity() {
 
                         }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
 
+                    val calendar = Calendar.getInstance()
+                    val dateFormat = SimpleDateFormat("d MMM")
 
+//                    for (i in 1..10) {
+//                        calendar.add(Calendar.DATE, 1)
+//                        val nextDate = dateFormat.format(calendar.time)
+//                        println("Next date: $nextDate")
+//                    }
 
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = DarkBlue,
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+//                        elevation = CardDefaults.cardElevation(
+//                            defaultElevation = 4.dp
+//                        )
+                        ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Text(
+                                text = "DATE",
+                                color = White,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "FROM",
+                                color = LightBlue,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "TO",
+                                color = LightRed,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
 
+                    Spacer(modifier = Modifier.height(10.dp))
 
 
                     for (i in weatherList.indices) {
                         val pair = weatherList[i]
+                        val nextDate = dateFormat.format(calendar.time)
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier
@@ -271,42 +337,38 @@ class MainActivity : ComponentActivity() {
                                     containerColor = DarkBlue,
                                 ),
                                 shape = RoundedCornerShape(100.dp),
-
                                 ) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier.fillMaxWidth()
 
                                 ) {
-
-                                    Text(
-                                        buildAnnotatedString {
-                                            withStyle(
-                                                style = ParagraphStyle(lineHeight = 30.sp)
-
-                                            ) {
-                                                withStyle(style = SpanStyle(color = White)) {
-                                                    append("from ")
-                                                }
-                                                withStyle(style = SpanStyle(color = LightBlue)) {
-                                                    append("${pair.first.roundToInt()} ºC")
-                                                }
-                                                withStyle(style = SpanStyle(color = White)) {
-                                                    append(" to ")
-                                                }
-                                                withStyle(style = SpanStyle(color = LightRed)) {
-                                                    append("${pair.second.roundToInt()} ºC")
-                                                }
-                                            }
-                                        },
-                                        fontSize = 30.sp
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Text(
+                                            text = nextDate,
+                                            color = White,
+                                            fontSize = 30.sp
+                                        )
+                                        Text(
+                                            text = "${pair.first.roundToInt()} ºC",
+                                            color = White,
+                                            fontSize = 30.sp
+                                        )
+                                        Text(
+                                            text = "${pair.second.roundToInt()} ºC",
+                                            color = White,
+                                            fontSize = 30.sp
+                                        )
+                                    }
                                 }
 
                             }
 
                         }
-
+                        calendar.add(Calendar.DATE, 1)
                     }
                 }
 
