@@ -1,5 +1,6 @@
 package cheysoff.weather.presention
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cheysoff.weather.data.RepositoriyImpl.ERROR_SIMPLE
@@ -14,12 +15,29 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ViewModel : ViewModel() {
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching = _isSearching.asStateFlow()
+
+    fun onSearchTextChange(text: String) {
+        _searchText.value = text
+        Log.d("safas", text)
+    }
+
     private val useCase = UseCase()
     private val _screenState = MutableStateFlow<State>(State.Start)
     val screenState = _screenState.asStateFlow()
     val errorHandler = CoroutineExceptionHandler { _, exeption ->
         viewModelScope.launch {
             _screenState.emit(State.Error(exeption.message ?: ERROR_SIMPLE))
+        }
+    }
+
+    fun setToStart() {
+        viewModelScope.launch(Dispatchers.IO + errorHandler) {
+            _screenState.emit(State.Start)
         }
     }
 

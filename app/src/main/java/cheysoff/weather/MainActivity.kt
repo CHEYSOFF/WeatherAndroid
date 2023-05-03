@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,15 +30,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,12 +49,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cheysoff.weather.data.RepositoriyImpl.ERROR_SIMPLE
 import cheysoff.weather.domain.data.City
 import cheysoff.weather.presention.State
 import cheysoff.weather.presention.ViewModel
-import cheysoff.weather.screens.MainViewModel
 import cheysoff.weather.ui.theme.DarkBlue
 import cheysoff.weather.ui.theme.LightBlue
 import cheysoff.weather.ui.theme.LightBlue2
@@ -72,36 +75,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.viewModelScope.launch {
-            viewModel.screenState
-                .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
-                .buffer()
-                .collect { state ->
-                    when (state) {
-                        is State.Start -> {
-                            viewModel.getCoordinatesByCityName(CITY_NAME)
-                        }
-
-                        is State.HasCityData -> {
-                            viewModel.getWeatherByCoordinates(state.city, DAYS)
-                        }
-
-                        is State.HasAllData -> {
-                            withContext(Dispatchers.Main) {
-                                setContent {
-                                    ShowWeatherList(state.weatherList, state.city)
-                                }
-                            }
-                        }
-
-                        is State.Error -> {
-                            setContent {
-                                ShowError(state.errorText)
-                            }
-                        }
-                    }
-                }
-        }
         lifecycleScope.launch(Dispatchers.IO) {
             if (!isInternetAvailable()) {
                 withContext(Dispatchers.Main) {
@@ -111,6 +84,45 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        viewModel.viewModelScope.launch {
+                viewModel.screenState
+                    .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
+                    .buffer()
+                    .collect { state ->
+                        when (state) {
+                            is State.Start -> {
+                                Log.d("Start", "Start")
+
+                                viewModel.getCoordinatesByCityName(CITY_NAME)
+                            }
+
+                            is State.HasCityData -> {
+                                Log.d("HasCityData", "HasCityData")
+
+                                viewModel.getWeatherByCoordinates(state.city, DAYS)
+                            }
+
+                            is State.HasAllData -> {
+                                Log.d("HasAllData", "HasAllData")
+
+                                withContext(Dispatchers.Main) {
+                                    setContent {
+                                        ShowWeatherList(state.weatherList, state.city)
+                                    }
+                                }
+                            }
+
+                            is State.Error -> {
+                                setContent {
+                                    ShowError(state.errorText)
+                                }
+                            }
+                        }
+                    }
+            }
+
+
+
     }
 
     @Composable
@@ -277,12 +289,6 @@ class MainActivity : ComponentActivity() {
                     val calendar = Calendar.getInstance()
                     val dateFormat = SimpleDateFormat("d MMM")
 
-//                    for (i in 1..10) {
-//                        calendar.add(Calendar.DATE, 1)
-//                        val nextDate = dateFormat.format(calendar.time)
-//                        println("Next date: $nextDate")
-//                    }
-
                     Card(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -290,10 +296,7 @@ class MainActivity : ComponentActivity() {
                             containerColor = DarkBlue,
                         ),
                         shape = RoundedCornerShape(10.dp),
-//                        elevation = CardDefaults.cardElevation(
-//                            defaultElevation = 4.dp
-//                        )
-                        ) {
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
@@ -337,7 +340,7 @@ class MainActivity : ComponentActivity() {
                                     containerColor = DarkBlue,
                                 ),
                                 shape = RoundedCornerShape(100.dp),
-                                ) {
+                            ) {
                                 Box(
                                     contentAlignment = Alignment.Center,
                                     modifier = Modifier.fillMaxWidth()
@@ -376,25 +379,35 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
     @Composable
     fun SearchBar() {
 
         WeatherTheme() {
-            val viewModel = viewModel<MainViewModel>()
             val searchText by viewModel.searchText.collectAsState()
-//                val persons by viewModel.persons.collectAsState()
             val isSearching by viewModel.isSearching.collectAsState()
             Column(
                 modifier = Modifier
                     .padding(15.dp)
             ) {
+                val keyboardController = LocalSoftwareKeyboardController.current
                 TextField(
                     value = searchText,
                     onValueChange = viewModel::onSearchTextChange,
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(text = "Search") }
+                    placeholder = { Text(text = "Search by city name") },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            CITY_NAME = searchText
+
+                            viewModel.setToStart()
+                            Log.d("cn", CITY_NAME)
+                            keyboardController?.hide()
+                        }
+                    )
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
                 if (isSearching) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -402,28 +415,13 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                } else {
-//                        LazyColumn(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .weight(1f)
-//                        ) {
-//                            items(persons) { person ->
-//                                Text(
-//                                    text = "${person.firstName} ${person.lastName}",
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .padding(vertical = 16.dp)
-//                                )
-//                            }
-//                        }
                 }
             }
         }
     }
 
     companion object {
-        private const val CITY_NAME = "Moscow"
-        private const val DAYS = 16
+        var CITY_NAME = "Moscow"
+        var DAYS = 16
     }
 }
