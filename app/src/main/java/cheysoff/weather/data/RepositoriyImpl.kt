@@ -14,7 +14,13 @@ object RepositoriyImpl : Repositoriy {
     private const val EMPTY_LAT = 0.0
     const val ERROR_SIMPLE = "Произошла ошибка интернет соединения, попробуйте позже"
 
-    override suspend fun getCoordinatesByCityName(cityName: String): RequestState {
+    fun trimAndReplace(input: String): String {
+        val trimmed = input.trim()
+        return trimmed.replace(Regex("[\\s-]+"), "_")
+    }
+
+    override suspend fun getCoordinatesByCityName(cityNameUntrimmed: String): RequestState {
+        val cityName = trimAndReplace(cityNameUntrimmed)
 
         val url =
             "https://nominatim.openstreetmap.org/search?city=$cityName&countrycodes=\$countryCode&limit=9&format=json"
